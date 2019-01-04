@@ -2,6 +2,7 @@ import TileSet from "./tileSet";
 import TileCoord from './tileCoord';
 import Tile from './tile';
 import TileType from './tileType';
+import ITileRegion from "./regions/iTileRegion";
 
 /**
  * Layer of tiles within a TileMap.
@@ -64,10 +65,10 @@ export default class TileLayer {
 	/// </summary>
 	/// <param name="region"></param>
 	/// <param name="type"></param>
-	public SetTileType<T>(region: T, type: TileType): void {
+	public SetTileType(region:ITileRegion, type: TileType): void {
 
 		let id: number = type.id;
-		for (var coord in region) {
+		for (var coord of region) {
 
 			this.tiles[coord.row][coord.col].tileTypeId = id;
 		}
@@ -79,11 +80,11 @@ export default class TileLayer {
 	/// </summary>
 	/// <param name="region"></param>
 	/// <param name="type"></param>
-	public setRegionTypes<T>(region: T, type: TileType, orientation: number): void {
+	public setRegionTypes(region:ITileRegion, type: TileType, orientation: number=0): void {
 
 		let tile: Tile = new Tile(type.id, orientation);
 
-		for (var coord in region) {
+		for (var coord of region) {
 
 			this.tiles[coord.row][coord.col] = tile;
 		}
@@ -160,7 +161,7 @@ export default class TileLayer {
 
 	} //
 
-	public IsEmpty(r: number, c: number): boolean {
+	public isEmpty(r: number, c: number): boolean {
 
 		return this.tiles[r][c].isEmpty;
 

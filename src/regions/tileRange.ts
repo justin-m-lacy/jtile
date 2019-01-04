@@ -72,7 +72,7 @@ export default class TileRange implements ITileRegion {	//} IEnumerable<TileCoor
 			return "col: " + this.minCol + " -> " + this.maxCol + "\nRow: " + this.minRow + " -> " + this.maxRow;
 		}
 
-		public *[Symbol.iterator]() {
+		public *[Symbol.iterator]():Iterator<TileCoord> {
 
 			for ( var r:number = this.minRow; r < this.maxRow; r++ ) {
 				for ( var c:number= this.minCol; c < this.maxCol; c++ ) {

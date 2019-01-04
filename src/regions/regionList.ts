@@ -1,15 +1,14 @@
-﻿import TileLayer from '../tileLayer';
-import TileType from '../tileType';
-import TileCoord from '../tileCoord';
+﻿import TileCoord from '../tileCoord';
 import ITileRegion from './iTileRegion';
+import { UniqueIterator } from './iterators';
 
 export default class RegionList implements ITileRegion {
 
 		regions:ITileRegion[];
 
-		constructor( tileCoords:ITileRegion[] ) {
+		constructor( tileCoords:ITileRegion[]=null ) {
 
-			this.regions = new ITileRegion[ tileCoords ]();
+			this.regions = tileCoords || [];
 
 		}
 
@@ -45,13 +44,9 @@ export default class RegionList implements ITileRegion {
 
 		}
 
-		/*public IIterator<TileCoord> GetIterator() {
-			return new UniqueIterator<TileCoord>( this.regions.ToArray() );
+		*[Symbol.iterator]():Iterator<TileCoord> {
+			return new UniqueIterator( this.regions );
 		}
-
-		IIterator IEnumerable.GetIterator() {
-			return new UniqueIterator<TileCoord>( this.regions.ToArray() );
-		}*/
 	
 
 		public getSize():number {
@@ -59,11 +54,8 @@ export default class RegionList implements ITileRegion {
 			var count:number = 0;
 
 			//cant just loop through regions because some tiles could appear in multiple regions.
-			using ( IIterator < TileCoord> Iterator = this.GetIterator() ){
-
-				while ( Iterator.MoveNext() ) {
-					count++;
-				}
+			for ( var tileCoord in this ){
+				count++;
 			}
 
 			return count;

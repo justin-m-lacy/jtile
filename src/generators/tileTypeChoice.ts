@@ -70,7 +70,7 @@ export interface ITileTypeChoice {
 	/**
 	 * List of tileTypes with equal probability of any being returned.
 	 */
-	class TileTypeList extends Array<TileType> implements ITileTypeChoice {
+	export class TileTypeList extends Array<TileType> implements ITileTypeChoice {
 
 		public getTileType():TileType {
 			return this[ Math.floor( Math.random()*this.length )];
@@ -82,7 +82,7 @@ export interface ITileTypeChoice {
 	 * Defines a list of tile types, with the percent chance
 	 * of each tile type being selected.
 	 */
-	class TileTypeChoice implements ITileTypeChoice, Iterable<TileType> {
+	export class TileTypeChoice implements ITileTypeChoice, Iterable<TileType> {
 
 		private tileTypes:TileType[];
 

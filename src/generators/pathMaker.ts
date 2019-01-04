@@ -5,6 +5,9 @@ import TileType from '../tileType';
 import TileLayer from '../tileLayer';
 
 import BaseGenerator from './primary/baseGenerator';
+import { ITileTypeChoice } from './tileTypeChoice';
+import BlockingTypes from '../search/blockingTypes';
+import CustomPather from '../search/customPather';
 
 	/**
 	 * Ensures a path exists between two tiles on the map.
@@ -21,7 +24,7 @@ export default class PathMaker extends BaseGenerator {
 		/**
 		 * Tiles for each layer that can be used to create a walkable path.
 		 */
-		private List< ITileTypeChoice> replacableList;
+		private replacableList:ITileTypeChoice[]
 
 		/**
 		 * Tile types considered to be blocking the path for each layer
@@ -82,12 +85,12 @@ export default class PathMaker extends BaseGenerator {
 				ICollection<TileType> layerBlockers = blockers.GetBlockers( i );
 
 				// ensure a walkable tile type at EVERY layer.
-				for ( var coord:TileCoord in path ) {
+				for ( var coord of path ) {
 
 					type = layer.getTileType( coord.row, coord.col );
 					if ( layerBlockers.contains( type ) ) {
 
-						layer.setTileType( coord.row, coord.col, this.replacableList[i].GetTileType().id );
+						layer.setTileType( coord.row, coord.col, this.replacableList[i].getTileType().id );
 
 					}
 					// NOTE: a non-solid tile that coversLowerLayers, might not need its lower layer tiles replaced

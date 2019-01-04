@@ -48,11 +48,9 @@ export default class MapFeature {
 	
 			var maker:RegionMaker = new RegionMaker( bounds, this.areaType );
 
-			return maker.Generate();
+			return maker.generate();
 
 		}
 
 
 	}
-
-}

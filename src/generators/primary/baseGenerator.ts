@@ -1,7 +1,11 @@
 ﻿import TileMap from '../../tileMap';
 import TileSet from '../../tileSet';
 import TileType from '../../tileType';
-
+import ITileRegion from '../../regions/iTileRegion';
+import BlockingTypes from '../../search/blockingTypes';
+import { ITileTypeChoice } from '../tileTypeChoice';
+import TileCoord from '../../tileCoord';
+import PathMaker from '../pathMaker';
 /**
 * Base class for a variety of Level generators.
 */
@@ -21,12 +25,10 @@ export default abstract class BaseGenerator {
 		 * This should be done in the last phase of level generation to ensure no further changes
 		 * break the paths between the regions.
 		 */
-		protected List< Tuple<ITileRegion, ITileRegion> > linkRegions;
+		protected linkRegions:[ITileRegion, ITileRegion][];
 
 		constructor() {
-
-			this.linkRegions = new List<Tuple<ITileRegion, ITileRegion>>();
-
+			this.linkRegions = [];
 		}
 
 		/**
@@ -34,7 +36,7 @@ export default abstract class BaseGenerator {
 		 */
 		public addPathLink( t1:ITileRegion, t2:ITileRegion ):void {
 
-			this.linkRegions.add( new Tuple<ITileRegion, ITileRegion>( t1, t2 ) );
+			this.linkRegions.push( [t1, t2] );
 
 		}
 
@@ -53,21 +55,21 @@ export default abstract class BaseGenerator {
 		/**
 		 * Link all tiles in the linkPaths tuples.
 		 */
-		protected linkRegions():void {
+		protected linkAll():void {
 
 			var pather:PathMaker = new PathMaker( this.BuildBlockTypes(), this.BuildReplaceTypes() );
 
 			var end:TileCoord;
 
-			for ( Tuple<ITileRegion, ITileRegion> t in this.linkRegions ) {
+			for ( var t of this.linkRegions ) {
 
 				/**
 				 * TODO: skip tiles in the region that are already connected?
 				 */
-				for ( var tile1:TileCoord of t.a ) {
+				for ( var tile1 of t[0] ) {
 
-					end = t.b.PickTile();		// Random tile in destination region.
-					pather.Generate( curLevel.tileMap, tile1, end );
+					end = t[1].pickTile();		// Random tile in destination region.
+					pather.generate( this.curMap, tile1, end );
 	
 				}
 
@@ -90,11 +92,11 @@ export default abstract class BaseGenerator {
 		 * If a generator requires a path between two points, blocking tiles on that path
 		 * need to be replaced ( on all layers ) with walkable tiles.
 		 */
-		protected BuildReplaceTypes():List<ITileTypeChoice> {
+		protected BuildReplaceTypes():ITileTypeChoice[] {
 
-			List<ITileTypeChoice> replaceTypes = new List<ITileTypeChoice>();
+			let replaceTypes:ITileTypeChoice[] = [];
 
-			var map:TileMap = this.curLevel.tileMap;
+			var map:TileMap = this.curMap;
 
 			var set:TileSet;
 			var layerTypes:TileTypeList;
@@ -104,10 +106,10 @@ export default abstract class BaseGenerator {
 				set = map.getLayer( i ).tileSet;
 				layerTypes = new TileTypeList();
 
-				for ( var type:TileType of set ) {
+				for ( var type of set ) {
 
 					if ( !type.solid ) {
-						layerTypes.Add( type );
+						layerTypes.push( type );
 					}
 
 				}
@@ -126,25 +128,25 @@ export default abstract class BaseGenerator {
 		 */
 		protected BuildBlockTypes():BlockingTypes {
 
-			var blockers:BlockingTypes = new BlockingTypes();
-			var map:TileMap = this.curLevel.tileMap;
+			let blockers:BlockingTypes = new BlockingTypes();
+			let map:TileMap = this.curMap;
 
-			var set:TileSet;
-			var List<TileType> layerTypes;
+			let set:TileSet;
+			let layerTypes:TileType[];
 
 			for ( var i:number = map.layerCount - 1; i >= 0; i-- ) {
 
-				set = map.GetLayer( i ).TileSet;
-				layerTypes = new List<TileType>();
+				set = map.getLayer( i ).tileSet;
+				layerTypes = [];
 
-				foreach ( TileType type in set ) {
+				for ( var type of set ) {
 
-					if ( type.solid ) {
-						layerTypes.Add( type );
+					if ( type.solid === true ) {
+						layerTypes.push( type );
 					}
 
 				}
-				blockers.SetBlockers( i, layerTypes );
+				blockers.setBlockers( i, layerTypes );
 
 			}
 

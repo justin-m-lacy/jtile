@@ -204,19 +204,15 @@ export default class TileMap {
 		return this.rows * this.cols;
 	}
 
-	/*public IIterator<TileCoord> GetIterator() {
+	public *[Symbol.iterator]():Iterator<TileCoord> {
 
-		for ( let r:number = 0; r < rows; r++ ) {
-			for ( c:number= 0; c < cols; c++ ) {
-				yield return new TileCoord( r, c );
+		for ( let r:number = 0; r < this.rows; r++ ) {
+			for ( let c:number= 0; c < this.cols; c++ ) {
+				yield new TileCoord( r, c );
 			}
 		}
 
 	}
-
-	IIterator IEnumerable.GetIterator() {
-		return this.GetIterator();
-	}*/
 
 } // class
 

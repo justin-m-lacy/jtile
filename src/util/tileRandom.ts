@@ -1,40 +1,31 @@
-﻿import Direction from '../search/direction';
+﻿import {Direction} from '../tileCoord';
+import TileRect from '../tileRect';
+import TileCoord from '../tileCoord';
+import TileMap from '../tileMap';
+import TileLayer from '../tileLayer';
 
 export default {
 
-		/**
-		 * Get a random turn. (Change of direction by 90 degrees.)
-		 */
-		getTurn( dir:Direction ):Direction {
+	/**
+	 * Returns a random integer between low and high inclusive.
+	 */
+	range( low, high ) {
+		return low + Math.floor( Math.random()*(high+1-low) );
+	},
 
-			let r:number = Math.random();
+		getTurn( dir:Direction ):number {
 
-			switch ( dir ) {
+			return ( dir === Direction.DOWN || dir === Direction.UP ) ? (
 
-				case Direction.DOWN:
-				case Direction.UP:
-					if ( r < 0.5 ) {
-						return TileDirection.RIGHT;
-					} else {
-						return TileDirection.LEFT;
-					}
-				case Direction.LEFT:
-				case Direction.RIGHT:
-				default:
-					if ( r < 0.5 ) {
-						return Direction.UP;
-					} else {
-						return Direction.DOWN;
-					}
+				Math.random() < 0.5 ? Direction.LEFT : Direction.RIGHT
 
-			}
+			) : (
+				Math.random() < 0.5 ? Direction.UP : Direction.DOWN
+			);
 
-		}
+		},
 
-		/**
-		 * Returns a random TileDirection.
-		 */
-		Direction():Direction {
+		Direction():number {
 
 			let val:number = Math.random();
 			if ( val < 0.25 ) {
@@ -46,32 +37,32 @@ export default {
 			}
 			return Direction.RIGHT;
 
-		}
+		},
 
 		/**
 		 * checks the layers from highest to lowest and returns the first random tile found in range
 		 * that is empty on all layers.
 		*/
-		RandomEmpty( map:TileMap, range:TileRect ):boolean|TileCoord {
+		RandomEmpty( map:TileMap, rect:TileRect ):TileCoord {
 
-			let r:number = UnityEngine.Random.Range( range.minRow, range.maxRow );
-			let c:number = UnityEngine.Random.Range( range.minCol, range.maxCol );
+			let r:number = this.range( rect.minRow, rect.maxRow );
+			let c:number = this.range( rect.minCol, rect.maxCol );
 
 			if ( map.isEmpty( r, c ) ) {
 				return new TileCoord( r, c );
 			}
 
-			let max:number = range.getSize();
+			let max:number = rect.getSize();
 			let count:number = 1;
 
 			while ( count < max ) {
 
 				c++;
-				if ( c >= range.maxCol ) {
-					c = range.minCol;
+				if ( c >= rect.maxCol ) {
+					c = rect.minCol;
 					r++;
-					if ( r >= range.maxRow ) {
-						r = range.minRow;
+					if ( r >= rect.maxRow ) {
+						r = rect.minRow;
 					}
 				}
 
@@ -82,111 +73,105 @@ export default {
 
 			} //
 
-			return false;
+			return null;
 
-		} //
+		},
 
 		/**
-		 * returns a random empty tile within the given range, with a custom accept test, that
-		 * returns true if a tileCoordinate is accepted, false otherwise.
+		 * Return a random tile that passes a given test.
+		 * @param map 
+		 * @param rect 
+		 * @param acceptTest 
 		 */
-		RandomEmpty( map:TileMap, out TileCoord tile, TileRect range, Func<TileCoord,bool> acceptTest ):boolean {
+		FindEmpty( map:TileMap, rect:TileRect, acceptTest:(TileCoord)=>boolean ):TileCoord {
 
-			int r = UnityEngine.Random.Range( range.minRow, range.maxRow );
-			int c = UnityEngine.Random.Range( range.minCol, range.maxCol );
+			// begin at random location.
+			let r:number = this.range( rect.minRow, rect.maxRow );
+			let c:number = this.range( rect.minCol, rect.maxCol );
 
-			TileCoord testTile = new TileCoord( r, c );
-			if ( acceptTest( testTile ) ) {
-				tile = new TileCoord( r, c );
-				return true;
+			var testTile:TileCoord = new TileCoord( r, c );
+			if ( acceptTest( testTile ) === true ) {
+				return testTile;
 			}
 
-			int max = range.getSize();
-			int count = 1;
+			let max:number = rect.getSize();
+			let count:number = 1;
 
 			while ( count < max ) {
 
 				c++;
-				if ( c >= range.maxCol ) {
-					c = range.minCol;
+				if ( c >= rect.maxCol ) {
+					c = rect.minCol;
 					r++;
-					if ( r >= range.maxRow ) {
-						r = range.minRow;
+					if ( r >= rect.maxRow ) {
+						r = rect.minRow;
 					}
 				}
 
 				testTile.row = r;
 				testTile.col = c;
-				if ( acceptTest( testTile ) ) {
-					tile = testTile;
-					return true;
+				if ( acceptTest( testTile ) === true ) {
+					return testTile;
 				}
 				count++;
 
 			} //
 
-			tile = new TileCoord();
+			return null;
 
-			return false;
-
-		} //
+		},
 
 		  /**
-		   * gets a random available tile from the given range of tiles.
+		   * returns a random available tile from the given range of tiles.
 		   */
-		static public bool RandomEmpty( layer:TileLayer, out TileCoord tile, TileRect range ) {
+		InRange( layer:TileLayer, rect:TileRect ):TileCoord {
 
-			int r = UnityEngine.Random.Range( range.minRow, range.maxRow );
-			int c = UnityEngine.Random.Range( range.minCol, range.maxCol );
+			let r:number = this.range( rect.minRow, rect.maxRow );
+			let c:number = this.range( rect.minCol, rect.maxCol );
 
-			if ( layer.IsEmpty( r, c ) ) {
-				tile = new TileCoord( r, c );
-				return true;
+			if ( layer.isEmpty( r, c ) === true ) {
+				return new TileCoord( r, c );
 			}
 
-			int max = range.getSize();
-			int count = 1;
+			let max:number = rect.getSize();
+			let count:number = 1;
 
 			while ( count < max ) {
 
 				c++;
-				if ( c >= range.maxCol ) {
-					c = range.minCol;
+				if ( c >= rect.maxCol ) {
+					c = rect.minCol;
 					r++;
-					if ( r >= range.maxRow ) {
-						r = range.minRow;
+					if ( r >= rect.maxRow ) {
+						r = rect.minRow;
 					}
 				}
 
-				if ( layer.IsEmpty( r, c ) ) {
-					tile = new TileCoord( r, c );
-					return true;
+				if ( layer.isEmpty( r, c ) === true) {
+					return new TileCoord( r, c );
 				}
 				count++;
 
 			} //
 
-			tile = new TileCoord();
+			return null;
 
-			return false;
+		},
 
-		} //
+		InLayer( layer:TileLayer ):TileCoord {
 
-		RandomEmpty( layer:TileLayer, out tile:TileCoord ):boolean {
+			let rows:number = layer.rows;
+			let cols:number = layer.cols;
 
-			int rows = layer.rows;
-			int cols = layer.cols;
+			let r:number = Math.floor( Math.random()*rows );
+			let c:number = Math.floor( Math.random()*cols );
 
-			int r = UnityEngine.Random.Range( 0, rows );
-			int c = UnityEngine.Random.Range( 0, cols );
-
-			if ( layer.isEmpty( r, c ) ) {
-				tile = new TileCoord( r, c );
-				return true;
+			if ( layer.isEmpty( r, c ) === true ) {
+				return new TileCoord( r, c );
 			}
 
-			int max = rows * cols;
-			int count = 1;
+			let max:number = rows * cols;
+			let count:number = 1;
 
 			while ( count < max ) {
 
@@ -199,51 +184,49 @@ export default {
 					}
 				}
 
-				if ( layer.isEmpty( r, c ) ) {
-					tile = new TileCoord( r, c );
-					return true;
+				if ( layer.isEmpty( r, c ) === true ) {
+					return new TileCoord( r, c );
 				}
-				count++;
-
-			} //
-
-			tile = new TileCoord();
-
-			return false;
-
-		} //
-
-		/**
-		 * checks the layers from highest to lowest and returns the first random tile found in range
-		 * that is empty on all layers.
-		*/
-		RandomEmpty( map:TileMap ):TileCoord {
-
-			int r = UnityEngine.Random.Range( 0, map.Rows-1 );
-			int c = UnityEngine.Random.Range( 0, map.Cols-1 );
-
-			if ( map.IsEmpty( r, c ) ) return TileCoord( r, c );
-
-			int max = map.Rows * map.Cols;
-			int count = 1;
-
-			while ( count < max ) {
-
-				c++;
-				if ( c >= map.Cols ) {
-					c = 0;
-					r++;
-					if ( r >= map.Rows ) {
-						r = 0;
-					}
-				}
-
-				if ( map.IsEmpty( r, c ) ) return new TileCoord( r, c );
 				count++;
 
 			} //
 
 			return null;
 
-		} //
+		},
+
+		/**
+		 * checks the layers from highest to lowest and returns the first random tile found in range
+		 * that is empty on all layers.
+		*/
+		InMap( map:TileMap ):TileCoord {
+
+			let r:number = Math.floor( Math.random()*map.rows );
+			let c:number = Math.floor( Math.random()*map.cols );
+
+			if ( map.isEmpty( r, c ) ) return new TileCoord( r, c );
+
+			let max:number = map.rows * map.cols;
+			let count:number = 1;
+
+			while ( count < max ) {
+
+				c++;
+				if ( c >= map.cols ) {
+					c = 0;
+					r++;
+					if ( r >= map.rows ) {
+						r = 0;
+					}
+				}
+
+				if ( map.isEmpty( r, c ) === true ) return new TileCoord( r, c );
+				count++;
+
+			} //
+
+			return null;
+
+		}
+
 	}

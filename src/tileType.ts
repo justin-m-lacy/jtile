@@ -1,4 +1,6 @@
 
+import {ITileTypeChoice} from './generators/tileTypeChoice';
+
 	enum TileFlags {
 		None=0,
 		Ground=1,
@@ -10,7 +12,7 @@
 
 	export { TileFlags}
 
-	export default class TileType extends ITileTypeChoice {
+	export default class TileType implements ITileTypeChoice {
 
 		public id:number;
 
@@ -67,18 +69,16 @@
 		/**
 		 * TODO: possible? unify flat and floating tileType options into single integer.
 		 */
-		public depth:MapDepth;
+		public depth:number;
 
 		/// <summary>
 		/// A hittable rect defined in coordinates normalized within the tile (0,0) to (1,1)
 		/// Coordinates increase from bottom-left, to top-right.
 		/// The HitRect is ignored unless UseHitRect is set to true.
 		/// </summary>
-		public HitRect:Rect;
+		public HitRect:Object;
 
 		constructor( type_id:number, typeName:string, solid:boolean=false ) {
-
-			super();
 
 			this.id = type_id;
 
@@ -87,7 +87,7 @@
 
 		}
 
-		public GetTileType():TileType {
+		public getTileType():TileType {
 			return this;
 		}
 

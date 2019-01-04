@@ -4,7 +4,7 @@ import TileMap from '../tileMap';
 import TileType from '../tileType';
 import TileLayer from '../tileLayer';
 import TileCoord from '../tileCoord';
-import Direction from '../search/direction';
+import { Direction } from '../tileCoord';
 import TileRandom from '../util/TileRandom';
 
 export  default class RiverGenerator {

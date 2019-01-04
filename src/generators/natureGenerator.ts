@@ -8,7 +8,7 @@ import BaseGenerator from './primary/baseGenerator';
 	/**
 	 * Generates some trees and rocks on the top tile layer.
 	 */
-	class NatureGenerator extends BaseGenerator {
+export default class NatureGenerator extends BaseGenerator {
 
 		/**
 		 * number between 0 and 1 controlling how likely something is to generate.
@@ -55,7 +55,7 @@ import BaseGenerator from './primary/baseGenerator';
 					if ( Math.random() > this.density ) {
 						continue;
 					}
-					topLayer.SetTileType( r, c, Math.random()*numTypes );
+					topLayer.setTileType( r, c, Math.floor( Math.random()*numTypes ) );
 
 				} // for
 
@@ -64,5 +64,3 @@ import BaseGenerator from './primary/baseGenerator';
 		} // Generate()
 		
 	} // class
-	
-}

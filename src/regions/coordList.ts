@@ -81,7 +81,7 @@ export default class TileList implements ITileRegion {
 			return this.coords.slice();
 		}
 
-		*[Symbol.iterator](){
+		*[Symbol.iterator]():Iterator<TileCoord> {
 
 			let len = this.coords.length;
 			for( let i = 0; i < len; i++ ) yield this.coords[i];

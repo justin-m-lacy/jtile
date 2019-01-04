@@ -49,7 +49,7 @@ export default class RegionMaker {
 						Math.random()*1000000 );*/
 				case "circle":
 
-					return this.GenerateCircle();
+					return this.MakeCircle();
 
 				default:
 					return null;
@@ -60,7 +60,7 @@ export default class RegionMaker {
 		/**
 		 * TODO: better circle approx.
 		 */
-		public GenerateCircle():ITileRegion {
+		public MakeCircle():TileCircle {
 
 			var midCol:number = ( this.bounds.minCol + this.bounds.maxCol ) / 2;
 			var midRow:number = ( this.bounds.minRow + this.bounds.maxRow ) / 2;

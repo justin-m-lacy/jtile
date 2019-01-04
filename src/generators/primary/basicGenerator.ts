@@ -4,6 +4,7 @@ import TileMap from '../../tileMap';
 import TileLayer from '../../tileLayer';
 import TileSet from '../../tileSet';
 import BorderGenerator from '../border';
+import NatureGenerator from '../natureGenerator';
 
 	/**
 	 * Generates a basic KastleKraze map with a border of water around the edge.
@@ -39,7 +40,7 @@ export default class DefaultGenerator extends MapGenerator {
 			// set border tiles.
 			var generator:BorderGenerator = new BorderGenerator();
 
-			generator.BorderType = topSet.GetTileType( "CastleWall" ).id;
+			generator.BorderType = topSet.getTileType( "CastleWall" ).id;
 			generator.generate( map, loader );
 
 			var nature:NatureGenerator = new NatureGenerator();

@@ -2,7 +2,7 @@
 import TileMap from '../tileMap';
 import TileLayer from '../tileLayer';
 
-export default class PerlinGenerator implements ITileRegion {
+export default class PerlinGenerator {
 
 		/**
 		 * values below this generate the tileType on the given layer.
@@ -60,14 +60,14 @@ export default class PerlinGenerator implements ITileRegion {
 
 				noise = Math.PerlinNoise( offsetX + coord.col, offsetY + coord.row );
 				if ( noise <= this.cutOff ) {
-					layer.setTileType( coord.row, coord.col, this.GetTileType() );
+					layer.setTileType( coord.row, coord.col, this.getTileType() );
 				}
 
 			}
 
 		}
 
-		private GetTileType():number {
+		private getTileType():number {
 			return this.tileTypes[
 				Math.floor( Math.random()*this.tileTypes.length )
 			];

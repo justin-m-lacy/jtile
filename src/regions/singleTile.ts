@@ -34,7 +34,7 @@ export default class SingleTile implements ITileRegion {
 
 		}
 
-		*[Symbol.iterator]() {
+		*[Symbol.iterator]():Iterator<TileCoord> {
 			yield new TileCoord( this.row, this.col );
 		}
 

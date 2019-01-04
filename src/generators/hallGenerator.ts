@@ -8,7 +8,7 @@ export default class HallGenerator {
 	rooms: RoomData[];
 	private curMap: TileMap;
 
-	public constructor(roomList: RoomData[]) {
+	public constructor( roomList:RoomData[]) {
 
 		this.rooms = roomList;
 
@@ -126,7 +126,7 @@ export default class HallGenerator {
 	 * rooms must overlap at the given row.
 	 * if the rooms overlap, no passage is built.
 	 */
-	private buildRowPassage(room1: RoomData, room2: RoomData, row: number): void {
+	private buildRowPassage(room1: RoomData, room2: RoomData, row: number):void {
 
 		var startCol: number;
 		var maxCol: number;

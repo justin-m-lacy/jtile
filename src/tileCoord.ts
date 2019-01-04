@@ -1,4 +1,17 @@
-export default class TileCoord {
+import ITileRegion from "./regions/iTileRegion";
+
+enum Direction {
+
+	UP=1,
+	DOWN=2,
+	LEFT=3,
+	RIGHT=4
+
+}
+
+export {Direction };
+
+export default class TileCoord implements ITileRegion {
 
 	public static OFF_MAP:number = Number.MIN_VALUE;
 
@@ -41,6 +54,8 @@ export default class TileCoord {
 	public contains( row:number, col:number ):boolean {
 		return ( row === this.row && col === this.col );
 	}
+
+	*[Symbol.iterator]():Iterator<TileCoord> { yield this;}
 
 	public getSize():number {
 		return 1;

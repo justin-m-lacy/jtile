@@ -10,7 +10,7 @@ export default class Hallway {
 	/**
 	 * Final coordinates of the hallway. These are outside the rooms they link.
 	 */
-	//public TileCoord exit1, exit2;
+	//public exit1:TileCoord, exit2;
 
 	/**
 	 * rooms linked.
