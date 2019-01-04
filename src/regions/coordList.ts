@@ -82,12 +82,7 @@ export default class TileList implements ITileRegion {
 		}
 
 		*[Symbol.iterator]():Iterator<TileCoord> {
-
-			let len = this.coords.length;
-			for( let i = 0; i < len; i++ ) yield this.coords[i];
-
-			return;
-
+			return this.coords[Symbol.iterator]();
 		}
 	
 		public static FromRegion( region:RegionList ) {

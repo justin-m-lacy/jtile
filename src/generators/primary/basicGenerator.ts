@@ -11,9 +11,9 @@ import NatureGenerator from '../natureGenerator';
 	 */
 export default class DefaultGenerator extends MapGenerator {
 
-		public generate( map:TileMap, loader:IAssetLoader ):void {
+		public generate( map:TileMap ):void {
 
-			super.generate( map, loader );
+			super.generate( map );
 	
 			var baseSet:TileSet = TileSet.DefaultBase;
 			var topSet:TileSet = TileSet.DefaulTop;
@@ -26,7 +26,7 @@ export default class DefaultGenerator extends MapGenerator {
 				layer.tileSet = baseSet;
 			}
 
-			layer.clear( baseSet.GetTileType("Grass").id );
+			layer.clear( baseSet.getTileType("Grass").id );
 
 			layer = map.getLayer( 1 );
 			if ( layer == null ) {
@@ -41,10 +41,10 @@ export default class DefaultGenerator extends MapGenerator {
 			var generator:BorderGenerator = new BorderGenerator();
 
 			generator.BorderType = topSet.getTileType( "CastleWall" ).id;
-			generator.generate( map, loader );
+			generator.generate( map );
 
 			var nature:NatureGenerator = new NatureGenerator();
-			nature.generate( map, loader );
+			nature.generate( map );
 
 		}
 

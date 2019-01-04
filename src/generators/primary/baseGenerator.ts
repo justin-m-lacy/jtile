@@ -3,15 +3,14 @@ import TileSet from '../../tileSet';
 import TileType from '../../tileType';
 import ITileRegion from '../../regions/iTileRegion';
 import BlockingTypes from '../../search/blockingTypes';
-import { ITileTypeChoice } from '../tileTypeChoice';
+import { ITileTypeChoice, TileTypeList } from '../tileTypeChoice';
 import TileCoord from '../../tileCoord';
 import PathMaker from '../pathMaker';
+
 /**
 * Base class for a variety of Level generators.
 */
 export default abstract class BaseGenerator {
-
-		protected loader:IAssetLoader;
 
 		//protected TileSet baseSet;
 		//protected TileSet topSet;
@@ -40,9 +39,8 @@ export default abstract class BaseGenerator {
 
 		}
 
-		public generate( map:TileMap, assetLoader:IAssetLoader ):void {
+		public generate( map:TileMap ):void {
 
-			this.loader = assetLoader;
 			this.curMap = map;
 
 		}
@@ -69,7 +67,7 @@ export default abstract class BaseGenerator {
 				for ( var tile1 of t[0] ) {
 
 					end = t[1].pickTile();		// Random tile in destination region.
-					pather.generate( this.curMap, tile1, end );
+					pather.makePath( this.curMap, tile1, end );
 	
 				}
 
@@ -98,17 +96,17 @@ export default abstract class BaseGenerator {
 
 			var map:TileMap = this.curMap;
 
-			var set:TileSet;
+			var tset:TileSet;
 			var layerTypes:TileTypeList;
 
 			for ( var i:number = map.layerCount - 1; i >= 0; i-- ) {
 
-				set = map.getLayer( i ).tileSet;
+				tset = map.getLayer( i ).tileSet;
 				layerTypes = new TileTypeList();
 
-				for ( var type of set ) {
+				for ( var type of tset ) {
 
-					if ( !type.solid ) {
+					if ( type.solid === false ) {
 						layerTypes.push( type );
 					}
 

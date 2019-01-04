@@ -31,7 +31,7 @@ export default class TileMap {
 		return this._cols;
 	}
 
-	public constructor(num_layers: number = 1, map_rows: number = 1, map_cols: number = 1) {
+	public constructor( num_layers: number = 1, map_rows: number = 1, map_cols: number = 1 ) {
 
 		this._rows = map_rows;
 		this._cols = map_cols;

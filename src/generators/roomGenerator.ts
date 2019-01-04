@@ -1,6 +1,6 @@
 ﻿import RoomData from './roomData';
 import TileMap from '../tileMap';
-import Random from '../random';
+import Random from '../util/tileRandom';
 
 // TODO: only works with filled (non-passable) background which gets cut out.
 export default class RoomGenerator {

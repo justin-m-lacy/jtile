@@ -2,6 +2,7 @@
 import TileMap from '../../tileMap';
 import TileLayer from '../../tileLayer';
 import BaseGenerator from './baseGenerator';
+import { random } from '../../util/array';
 
 export default class OutdoorGenerator extends BaseGenerator {
 
@@ -15,13 +16,13 @@ export default class OutdoorGenerator extends BaseGenerator {
 		 */
 		public featureTypes:TileType[];
 
-		public generate( map:TileMap, loader:IAssetLoader ):void {
+		public generate( map:TileMap ):void {
 
-			super.generate( map, loader );
+			super.generate( map );
 
 			this.fillBaseTiles( this.terrainTypes );
 
-			this.linkRegions();
+			this.linkAll();
 
 		}
 
@@ -40,7 +41,7 @@ export default class OutdoorGenerator extends BaseGenerator {
 
 				for ( var c:number = 0; c < cols; c++ ) {
 
-					baseLayer.setTileType( r, c, types.randElement() );
+					baseLayer.setTileType( r, c, random(types).id );
 				}
 
 			}

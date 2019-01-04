@@ -52,7 +52,7 @@ export default class PathMaker extends BaseGenerator {
 
 		}
 
-		public generate( map:TileMap, start:TileCoord, end:TileCoord ):void {
+		public makePath( map:TileMap, start:TileCoord, end:TileCoord ):void {
 
 			this.curMap = map;
 
@@ -82,13 +82,13 @@ export default class PathMaker extends BaseGenerator {
 			for ( var i:number = num_layers - 1; i >= 0; i-- ) {
 
 				layer = this.curMap.getLayer( i );
-				ICollection<TileType> layerBlockers = blockers.GetBlockers( i );
+				let layerBlockers:Map<TileType,boolean> = this.blockers.getBlockers( i );
 
 				// ensure a walkable tile type at EVERY layer.
 				for ( var coord of path ) {
 
 					type = layer.getTileType( coord.row, coord.col );
-					if ( layerBlockers.contains( type ) ) {
+					if ( layerBlockers.has( type ) ) {
 
 						layer.setTileType( coord.row, coord.col, this.replacableList[i].getTileType().id );
 
@@ -121,11 +121,11 @@ export default class PathMaker extends BaseGenerator {
 				for ( var i:number = this.curMap.layerCount - 1; i >= 0; i-- ) {
 
 					layer = this.curMap.getLayer( i );
-					ICollection<TileType> layerBlockers = blockers.GetBlockers( i );
+					let layerBlockers:Map<TileType,boolean> = this.blockers.getBlockers( i );
 
 					// one space away.
 					var type:TileType = layer.getTileType( destRow, destCol );
-					if ( layerBlockers.contains( type ) ) {
+					if ( layerBlockers.has( type ) ) {
 
 						// this tile would normally be un-walkable and should be given a high cost to count as a path.
 						return PathMaker.MAX_COST;

@@ -48,6 +48,10 @@ export default class TileLayer {
 
 	} //
 
+	/**
+	 * Don't access the underlying tiles unless speed is required,
+	 * and you know what you're doing.
+	 */
 	public getTiles(): Tile[][] {
 		return this.tiles;
 	}
@@ -65,7 +69,7 @@ export default class TileLayer {
 	/// </summary>
 	/// <param name="region"></param>
 	/// <param name="type"></param>
-	public SetTileType(region:ITileRegion, type: TileType): void {
+	public setType(region:ITileRegion, type: TileType): void {
 
 		let id: number = type.id;
 		for (var coord of region) {
@@ -167,7 +171,7 @@ export default class TileLayer {
 
 	} //
 
-	public ClearTile(r: number, c: number): void {
+	public clearTile(r: number, c: number): void {
 		this.tiles[r][c].tileTypeId = 0;
 	}
 
@@ -176,9 +180,8 @@ export default class TileLayer {
 		// don't reallocate if the new size is the same.
 		if (this.tiles) {
 
-			if (this.rows == map_rows && this.cols == map_cols) {
-				return;
-			}
+			if (this.rows === map_rows && this.cols === map_cols) return;
+
 			this.resize(map_rows, map_cols);
 			return;
 
@@ -247,7 +250,7 @@ export default class TileLayer {
 	/// Returns a random Tile Coordinate within the tile layer.
 	/// </summary>
 	/// <returns></returns>
-	public PickTile(): TileCoord {
+	public pickTile(): TileCoord {
 
 		return new TileCoord(Math.random() * this.rows, Math.random() * this.cols);
 	}
@@ -265,18 +268,17 @@ export default class TileLayer {
 		return this.rows * this.cols;
 	}
 
-	/*public IIterator<TileCoord> GetIterator() {
+	*[Symbol.iterator]():Iterator<TileCoord> {
+
+		let rows = this.rows;
+		let cols = this.cols;
 
 		for ( var r:number = 0; r < rows; r++ ) {
 			for ( var c:number= 0; c < cols; c++ ) {
-				yield return new TileCoord( r, c );
+				yield new TileCoord( r, c );
 			}
 		}
 
 	}
-
-	IIterator IEnumerable.GetIterator() {
-		return this.GetIterator();
-	}*/
 
 } // class

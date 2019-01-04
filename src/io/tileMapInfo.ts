@@ -1,4 +1,5 @@
 ﻿import TileMap from "../tileMap";
+import { decodeLayerTiles } from "./encoding";
 
 	/**
 	* Information about a TileLayer.
@@ -28,6 +29,7 @@ export class TileLayerInfo {
 
 /**
 * Information about a TileMap.
+Currently unused.
 */
 export default class TileMapInfo {
 
@@ -77,7 +79,7 @@ export default class TileMapInfo {
 
 			var len:number = this.layersInfo.length;
 			for ( var i:number = 0; i < len; i++ ) {
-				TileMapDecoder.DecodeBase64Layer( map.getLayer( i ), this.layersInfo[i].mapData, this.layersInfo[i].tileBytes );
+				decodeLayerTiles( map.getLayer( i ), this.layersInfo[i].mapData, this.layersInfo[i].tileBytes );
 			}
 
 		}

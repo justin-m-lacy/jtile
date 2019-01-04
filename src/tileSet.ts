@@ -118,12 +118,10 @@ export default class TileSet {
 
 		} //
 
-		*[Symbol.iterator](){
+		*[Symbol.iterator]():Iterator<TileType> {
 
 			let len = this._tileTypes.length;
 			for( let i = 0; i < len; i++ ) yield this._tileTypes[i];
-	
-			return this;
 
 		}
 

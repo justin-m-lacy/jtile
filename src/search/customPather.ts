@@ -2,6 +2,7 @@
 import TileMap from '../tileMap';
 import { TilePathNode } from './tilePather';
 import Heap from '../types/heap';
+import { multi } from '../util/array';
 
 /**
 * Like the basic TilePather, but allows for a custom function for the distance between tiles.
@@ -47,7 +48,7 @@ export default class CustomPather {
 
 			this.Fringe = new Heap<TilePathNode>( searchMap.rows * searchMap.cols );
 
-			this.visited = new number[map.rows, map.cols];
+			this.visited = multi<number>( this._map.rows, this._map.cols );
 
 			if ( !acceptTest ) {
 				this.AcceptTest = this.DefaultAccept;
@@ -333,7 +334,7 @@ export default class CustomPather {
 			  Must be called if the TileMap size changes, because the visited tiles have to be updated as well.
 		  **/
 		public UpdateMapSize():void {
-			this.visited = new number[this.map.rows][this.map.cols];
+			this.visited = multi<number>( this._map.rows, this._map.cols );
 		} //
 
 		/**

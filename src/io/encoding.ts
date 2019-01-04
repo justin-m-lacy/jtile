@@ -1,205 +1,196 @@
-import TileMap from '../tileMap';
-import TileLayer from '../tileLayer';
-import Tile from '../tile';
-import TileSet from '../tileSet';
+import TileMap from "../tileMap";
+import TileLayer from "../tileLayer";
+import TileSet from "../tileSet";
+import Tile from "../tile";
 
-export const TileMapDecoder = {
+/**
+ * {number} Encoding bytes per tile in the current implementation.
+ */
+export const TILE_ENCODE_BYTES:number = 5;
 
-		LEGACY_TILE_BYTES:6,
-
-		/**
-		takes the information from a MapData xml node and fills the given tileMap with the correct tile information.
-		**/
-		DecodeMapXML( xmlData:XMLNode ):TileMap {
-
-			XmlNode child;
-
-			let count:number= xmlData.NumChildren;
-			if ( count <= 0 ) {
-				return null;
-			}
-
-			let expectedRows:number= xmlData.GetIntAttribute( "rows" );
-			let expectedCols:number= xmlData.GetIntAttribute( "cols" );
-
-			let map:TileMap = new TileMap( count, expectedRows, expectedCols );
-
-			let layerText:string;
-			let tileBytes:number;
-			let layer:TileLayer;
-
-			let i:number= 0;
-			for ( let child = xmlData.FirstChild; child != null; child = child.Next, i++ ) {
-
-				layerText = child.NodeText;
-				if ( layerText ) {
-					console.log( "Error: Missing TileLayer data." );
-					continue;
-				}
-
-				try {
-
-					layer = map.getLayer( i );
-
-					// expected size in bytes of each tile.
-					tileBytes = child.GetIntAttribute( "tilesize", LEGACY_TILE_BYTES );
-					layer.preferredSet = child.GetAttribute( "tileset", "default" );
-
-					this.DecodeBase64Layer( map.getLayer( i ), layerText, tileBytes );
+export function mapToJSON():string {
+	return '';
+}
 
 
-				} catch ( e:Error ) {
-					console.log( "error: " + e.ToString() );
-					throw new Error( "Error parsing map data." );
-				}
+export function encodeMap( map:TileMap ):string {
 
-			} // for-loop;
+	let count:number= map.layerCount;
+	let json:any = {};
 
-			return map;
+	let layer:TileLayer;
 
-		} // 
+	json.rows = map.rows;
+	json.cols = map.cols;
 
-	 	DecodeBase64Layer( layer:TileLayer, stringData:string, tileSize:number):void {
+	let layers:object[] = [];
+	let layerData:any, set:TileSet;
 
-			byte[] rawBytes = Convert.FromBase64String( stringData );
-			this.DecodeTileLayer( layer, rawBytes, tileSize );
+	for( let i:number= 0; i < count; i++ ) {
 
-		} //
+		layer = map.getLayer( i );		
+		layerData = {};
 
-		/**
-		 * tileSize is the size in bytes of each encoded tile.
-		 */
-		DecodeTileLayer( mapLayer:TileLayer, byte[] compressedData, tileSize:number):void {
+		layerData.rows = layer.rows;
+		layerData.cols = layer.cols;
 
-			byte[] data = CLZF.Decompress( compressedData );
+		layerData.tilesize = TILE_ENCODE_BYTES;
 
-			using ( MemoryStream rawStream = new MemoryStream( data ) ) {
+		set = layer.tileSet;
+		if ( set && set.name ) {
+			layerData.tileset = set.name;
+		}
 
-				// MIGHT need to flush here.
-				BinaryReader reader = new BinaryReader( rawStream );
-				let rows:number= reader.ReadInt32();
-				let cols:number= reader.ReadInt32();
+		layerData.tiles = encodeLayerTiles( layer );
+		layers.push( layerData );
 
-				// initialize map storage.
-				// Only expand the map - never shrink - to ensure the layer isn't shrunk smaller than the containing map.
-				mapLayer.expand( rows, cols );
+	} //
 
-				let padding:number= tileSize - 2;
-				if ( padding < 0 ) { padding = 0; }
+	json.layers = layers;
 
-				let typeId:number;
-				let orientation:number;
+	return JSON.stringify( json );
 
-				for ( var r:number= 0; r < rows; r++ ) {
+}
 
-					for ( var c:number= 0; c < cols; c++ ) {
+export function encodeLayerTiles( layer:TileLayer, buffer?:Uint8Array ):string {
 
-						typeId = reader.ReadByte();
-						orientation = reader.ReadByte();
+	let tile:Tile;
 
-						// read back any remaining padding.
-						if ( padding > 0 ) {
-							reader.ReadBytes( padding );
-						}
+	let rows:number= layer.rows;
+	let cols:number= layer.cols;
 
-						mapLayer.SetTile( r, c, new Tile( typeId, orientation ) );
+	buffer = buffer || new Uint8Array( rows*cols*TILE_ENCODE_BYTES );
 
-					} // for-loop.
+	let index:number = 0;
 
-				} // for-loop.
+	for( var r:number=0; r < rows; r++ ) {
+					
+		for( var c:number =0; c < cols; c++ ) {
 
-			} // using rawStream
+			index = write32( buffer, tile.tileTypeId, index );
+			buffer[index++] = tile.orientation;
+						
+		} // for-loop.
+					
+	} // for-loop.
 
-		} //
+	return btoa( new TextDecoder( 'utf8' ).decode( buffer ) );
+
+}
+
+export function decodeMap( json:string ):TileMap {
+
+	let obj:any = JSON.parse( json );
+
+	let layersData:any = obj.layers;
+	let rows:number = obj.rows;
+	let cols:number = obj.cols;
+
+	let map = new TileMap( layersData.length, rows, cols );
+
+	let layerData, layer;
+	for( let i = 0; i < layersData.length; i++ ) {
+
+		layer = map.getLayer( i );
+		layerData = layersData[i];
+
+		decodeLayerTiles( layer, layerData.tiles, TILE_ENCODE_BYTES );
 
 	}
 
-	class TileMapEncoder {
+	return map;
 
-		public static XmlNode EncodeMapXML( map:TileMap ) {
+}
 
-			let count:number= map.layerCount;
-			let layer:TileLayer;
+/**
+ * 
+ * @param {TileLayer} layer - tiles will be read into this layer's tiles.
+ * @param {string} tileData base64 encoded tile data.
+ * @param {number} tileBytes - encoded bytes per tile.
+ */
+export function decodeLayerTiles( layer:TileLayer, tileData:string, tileBytes:number=TILE_ENCODE_BYTES ):void {
 
-			XmlNode root = new XmlNode( "mapData" );
-			XmlNode child;
+	let tiles = layer.getTiles();
+	let tileRow:Tile[];
 
-			root.SetAttribute( "rows", map.rows );
-			root.SetAttribute( "cols", map.cols );
+	let tile:Tile;
+	let index = 0, rows:number = layer.rows, cols:number = layer.cols;
 
-			let tileSize:number = Tile.GetEncodeSize();
-			let set:TileSet;
-	
-			for( let i:number= 0; i < count; i++ ) {
+	let buffer:Uint8Array = ( new TextEncoder().encode( atob( tileData ) ) );
 
-				layer = map.getLayer( i );
-				child = new XmlNode( "layer" );
-				child.SetAttribute( "rows", layer.rows );
-				child.SetAttribute( "cols", layer.cols );
-				child.SetAttribute( "tilesize", tileSize );
+	if ( buffer.length !== (rows*cols*tileBytes) )
+		throw new Error( 'Unexpected data size: Expected: ' + (rows*cols*tileBytes) + ' got: ' + buffer.length );
 
-				set = layer.tileSet;
-				if ( set && !set.name ) {
-					child.SetAttribute( "tileset", set.name );
-				}
+	let orient:number, type:number;
 
-				child.NodeText = Convert.ToBase64String( EncodeTileLayer( layer, tileSize ) );
+	for( let r:number = 0; r < rows; r++ ) {
 
-				root.AddChild( child );
+		tileRow = tiles[r];
+		for( var c:number = 0; c <cols; c++ ) {
 
-			} //
+			type = read32( buffer, index );
+			index += 4;
+			orient = buffer[index++];
 
-			return root;
+			tile = new Tile( type, orient );
+			tileRow[c] = tile;
 
-		} //
-
-		public static EncodeBase64Layer( layer:TileLayer, tileSize:number):string {
-
-			byte[] compressed = EncodeTileLayer( layer, tileSize );
-			return Convert.ToBase64String( compressed );
-
-		} //
-
-		/*
-		 */
-		public static byte[] EncodeTileLayer( mapLayer:TileLayer, tileSize:number) {
-			
-			let rows:number= mapLayer.rows;
-			let cols:number= mapLayer.cols;
-
-			let expectedCapacity:number= rows*cols * tileSize;
-
-			using ( MemoryStream stream = new MemoryStream( expectedCapacity ) ) {
-				
-				BinaryWriter writer = new BinaryWriter( stream );
-				
-				// write map size data. TODO: place high level data in xml?
-				writer.Write( rows );
-				writer.Write( cols );
-				
-				let tile:Tile;
-				
-				for( var r:number=0; r < rows; r++ ) {
-					
-					for( var c:number =0; c < cols; c++ ) {
-						
-						tile = mapLayer.getTile( r, c );
-						writer.Write( tile.tileTypeId );
-						writer.Write( tile.orientation );
-						
-					} // for-loop.
-					
-				} // for-loop.
-				
-				//console.log( "size pre-compress: " + stream.length );
-				byte[] compressed = CLZF.Compress( stream.GetBuffer() );
-				//return CLZF.Compress( stream.GetBuffer() );
-				//console.log( "size after compress: " + compressed.length );
-				
-				return compressed;
-				
-			} // uncompressed stream
-			
-		} // Encode()
+		}
 
 	}
+
+}
+
+/**
+ * Write a 32 bit number to a buffer.
+ * @param buffer 
+ * @param {number} val - value to write.
+ * @param at
+ * @returns {number} the next buffer index.
+ */
+function write32( buffer:Uint8Array, val:number, at:number=0 ):number {
+
+	buffer[at++] = 0xFF&val;
+	buffer[at++] = 0xFF&(val>>8);
+	buffer[at++] = 0xFF&(val>>16);
+	buffer[at++] = 0xFF&(val>>24);
+
+	return at;
+
+}
+
+/**
+ * Write a 16 bit number from a buffer.
+ * @param buffer
+ * @param {number} val - value to write.
+ * @param at
+ * @returns {number} the next buffer index.
+ */
+function write16( buffer:Uint8Array, val:number, at:number=0 ):number {
+
+	buffer[at++] = 0xFF&val;
+	buffer[at++] = 0xFF&(val>>8);
+
+	return at;
+
+}
+
+function read32( buffer:Uint8Array, at:number=0 ):number {
+
+	let val = buffer[at++];
+	val += buffer[at++] << 8;
+	val += buffer[at++] << 16;
+	val += buffer[at++] << 24;
+
+	return val;
+
+}
+
+function read16( buffer:Uint8Array, at:number=0 ):number {
+
+	let val = buffer[at++];
+	val += buffer[at++] << 8;
+
+	return val;
+
+}

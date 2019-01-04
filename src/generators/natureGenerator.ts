@@ -25,9 +25,9 @@ export default class NatureGenerator extends BaseGenerator {
 		// id of the castle wall tileType
 		public CastleType:number;
 		
-		public generate( map:TileMap, loader:IAssetLoader ):void {
+		public generate( map:TileMap ):void {
 
-			super.generate( map, loader );
+			super.generate( map );
 
 			var baseLayer:TileLayer = map.getLayer( 0 );
 			var topLayer:TileLayer = map.getLayer( 1 );

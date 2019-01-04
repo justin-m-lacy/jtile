@@ -2,7 +2,7 @@
 import TileMap from "../tileMap";
 import TileCoord from "../tileCoord";
 import TileLayer from "../tileLayer";
-import { ITileTypeChoice } from '../regions/tileTypeChoice';
+import { ITileTypeChoice } from '../generators/tileTypeChoice';
 /**
 * Describes which tileTypes are treated as blocked at each layer of a tile map.
 */
@@ -11,25 +11,31 @@ export default class BlockingTypes {
 		/**
 		 * defines a set of blocking tile types for each tile layer. Tile layer is the list index.
 		 */
-		protected blockers:List<ICollection<TileType>>;
+		protected blockers:Map<TileType,boolean>[];
 
 		constructor() {
-			this.blockers = new List<ICollection<TileType>>();
+			this.blockers = [];
 		}
 
 		/**
 		 * Set the blocking tile types for a given tile map layer.
 		 */
-		public setBlockers( layer:number, blockers:ICollection<TileType> ):void {
+		public setBlockers( layer:number, blockers:Iterable<TileType> ):void {
 
-			this.blockers[layer] = blockers;
+			let layerMap = new Map<TileType,boolean>();
+
+			for( let t of blockers ) {
+				layerMap.set( t, true );
+			}
+	
+			this.blockers[layer] = layerMap;
 
 		}
 
 		/**
 		 * Returns the tiles that are considered blocking tiles for the given tile layer.
 		 */
-		public getBlockers( layer:number ):ICollection<TileType> {
+		public getBlockers( layer:number ):Map<TileType,boolean> {
 
 			return this.blockers[layer];
 
@@ -62,7 +68,7 @@ export default class BlockingTypes {
 		}
 
 		public getReplacement( layer:number ):TileType {
-			return this.replaceTypes[layer].GetTileType();
+			return this.replaceTypes[layer].getTileType();
 		}
 
 		/**
@@ -83,7 +89,7 @@ export default class BlockingTypes {
 				for ( var coord of path ) {
 
 					type = layer.getTileType( coord.row, coord.col );
-					if ( this.blockers[i].contains( type ) ) {
+					if ( this.blockers[i].has( type ) ) {
 
 						layer.setTileType( coord.row, coord.col, this.replaceTypes[i].getTileType().id );
 

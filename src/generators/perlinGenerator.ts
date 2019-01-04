@@ -2,6 +2,7 @@
 import TileMap from '../tileMap';
 import TileLayer from '../tileLayer';
 
+// TODO: perlin noise.
 export default class PerlinGenerator {
 
 		/**
@@ -12,7 +13,7 @@ export default class PerlinGenerator {
 				return this._cutOff;
 			}
 
-		public set cutOff(v) {
+		public set cutOff( v:number) {
 			this._cutOff = v;
 		}
 
@@ -54,11 +55,11 @@ export default class PerlinGenerator {
 			var offsetX:number = Math.random()*1000000.0;
 			var offsetY:number = Math.random()*1000000.0;
 
-			var noise:number;
+			var noise:number = 0;
 			var layer:TileLayer = map.getLayer( this.tileLayer );
-			for ( var coord of region ) {
+			for ( var coord of this.region ) {
 
-				noise = Math.PerlinNoise( offsetX + coord.col, offsetY + coord.row );
+				//noise = Math.PerlinNoise( offsetX + coord.col, offsetY + coord.row );
 				if ( noise <= this.cutOff ) {
 					layer.setTileType( coord.row, coord.col, this.getTileType() );
 				}
